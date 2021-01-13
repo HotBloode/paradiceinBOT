@@ -5,8 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:paradiceinBOT"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="MainWindow" Height="263.6" Width="260.875" MaxWidth="260.875" MaxHeight="263.6" MinWidth="260.875" MinHeight="263.6">
+    <Grid Margin="0,0,3.2,-0.4">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="143*"/>
+            <ColumnDefinition Width="108*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="bt1" Content="Start" HorizontalAlignment="Left" Margin="19,27,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click1" Grid.Column="1"/>
+
+        <TextBlock x:Name="tb1"  HorizontalAlignment="Left" Margin="27,54,0,0" TextWrapping="Wrap" Text="Пока пусто" VerticalAlignment="Top" Height="171" Width="120" Grid.ColumnSpan="2"/>
+
+
+        <ComboBox x:Name="cb1" HorizontalAlignment="Left" Margin="27,27,0,0" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="2">
+            <TextBlock Text="LTC"/>
+            <TextBlock Text="DASH"/>
+            <TextBlock Text="BTC"/>
+            <TextBlock Text="ETH"/>
+            <TextBlock Text="DOGE"/>
+            <TextBlock Text="PRDC"/>
+        </ComboBox>
+        <TextBox x:Name="textBet1" HorizontalAlignment="Left" Height="19" Margin="19,82,0,0" TextWrapping="Wrap" Text="0,00000001" VerticalAlignment="Top" Width="75" PreviewTextInput="TextBet1_PreviewTextInput" Grid.Column="1"/>
+
+
     </Grid>
 </Window>
