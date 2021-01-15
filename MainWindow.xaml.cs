@@ -37,12 +37,11 @@ namespace paradiceinBOT
             }
             else
             {
-                ClassBet bet1 = new ClassBet(tb1, Convert.ToDouble(textBet1.Text), textBet1.Text.Replace(",", "."), cb1.Text);
+                Controller contr = new Controller(tb1, Convert.ToDouble(textBet1.Text), textBet1.Text.Replace(",", "."),3 ,cb1.Text, Convert.ToDouble(tbChance.Text));
+
+                contr.Start();
+
                 (sender as Button).IsEnabled = false;
-
-
-                Thread ThreadForParser = new Thread(new ThreadStart(bet1.Start));
-                ThreadForParser.Start();
             }
         }
 

@@ -7,36 +7,44 @@ namespace paradiceinBOT
 {
     public class ClassBet
     {
-        private string path = @"token.txt";
+        //Токен авторизации
         private string token;
 
+        //Счётчики: Всего ставок, Текущий стак побед, Текущий стак поражений
         private long i = 0;
-        private long iw = 0;
-        private long il = 0;
+        private int maxL, maxW;
 
+        //Счётчки побед и поражений
+        private int iw = 0, il=0;
+
+        //Профит (на основе игры)
         private double profit = 0;
 
-
+        //Базовая ставка и текущая в дабле(для расчётов) и стринге (для запроса)
         private double baseBetD;
         private double betD;
-
         private string baseBetS;
         private string betS;
 
+        private string side;
+        private string chance;
 
-        private string side = "ABOVE";
-        private string chan = "52";
+        private double ch;
+
+        //Валюта игры
         private string сurrency;
 
+        //Ответ от сервера
         private string result;
 
+        //Максимум стак побед/поражений за сессию игры
         private int sesMaxLose = 0;
         private int sesMaxWin = 0;
 
-        private int maxL, maxW;
-
+        //Блок инфы
         private TextBlock frontStatusBlock;
 
+        //Клиент для запросов
         private RestClient client = new RestClient("https://api.paradice.in/api.php");
         RestRequest request = new RestRequest(Method.POST);
 
@@ -47,12 +55,14 @@ namespace paradiceinBOT
         private string s5 = "\"\r\n    },\r\n    \"query\": \"mutation rollDice($number: Float!, $betAmount: Float!, $side: RollSideEnum!, $currency: CurrencyEnum!) {\\n  rollDice(number: $number, betAmount: $betAmount, side: $side, currency: $currency) {\\n    id\\n    number\\n    roll\\n    rollSide\\n    win\\n    betAmount\\n    winAmount\\n    currency\\n    multiplier\\n    chance\\n    game\\n    bets {\\n      pocket\\n      payout\\n      win\\n      bet\\n      __typename\\n    }\\n    winLines {\\n      id\\n      __typename\\n    }\\n    user {\\n      id\\n      login\\n      lastActivity\\n      wallets {\\n        currency\\n        balance\\n        safeAmount\\n        __typename\\n      }\\n      loyaltyLevel {\\n        level {\\n          id\\n          category\\n          level\\n          __typename\\n        }\\n        __typename\\n      }\\n      privacySettings {\\n        isPMNotificationsEnabled\\n        isWageredHidden\\n        isAnonymous\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n}";
 
 
-        public ClassBet(TextBlock frontStatusBlock, double baseBetD, string baseBetS, string сurrency)
+        public ClassBet(TextBlock frontStatusBlock, double baseBetD, string baseBetS, string сurrency, string side, string token, double ch)
         {
             this.frontStatusBlock = frontStatusBlock;
             this.baseBetD = baseBetD;
             this.baseBetS = baseBetS;
             this.сurrency = сurrency;
+
+            this.side = side;
 
             betD = this.baseBetD;
             betS = this.baseBetS;
@@ -60,10 +70,12 @@ namespace paradiceinBOT
             maxL = 0;
             maxW = 0;
 
-            using (StreamReader sr = new StreamReader(path))
-            {
-                token = sr.ReadToEnd();
-            }
+            this.token = token;
+
+            this.ch = ch;
+
+            chance = ch.ToString();
+            chance = chance.Replace(",", ".");
 
             AddParametersToRequest();
         }
@@ -82,7 +94,7 @@ namespace paradiceinBOT
             request.AddHeader("Sec-Fetch-Mode", "cors");
             request.AddHeader("Sec-Fetch-Dest", "empty");
             request.AddHeader("Cookie", "__cfduid=d05ec5fcc4e574b8c77a5e81dc51caa411607638398; _ga=GA1.2.1474332697.1608739211");
-            request.AddParameter("application/json", s1 + betS + s2 + chan + s3 + side + s4 + сurrency + s5, ParameterType.RequestBody);
+            request.AddParameter("application/json", s1 + betS + s2 + chance + s3 + side + s4 + сurrency + s5, ParameterType.RequestBody);
         }
         private void InfOut()
         {
@@ -94,6 +106,7 @@ namespace paradiceinBOT
                 "\nMaxWin " + sesMaxWin +
                 "\nПрофит " + $"{profit:f8}"));
         }
+
         public void Start()
         {
             do
@@ -108,6 +121,7 @@ namespace paradiceinBOT
 
                     iw++;
                     fl = 1;
+                    
                 }
                 else if (result.Contains("win\":false"))
                 {
@@ -120,8 +134,7 @@ namespace paradiceinBOT
                 {
                     fl = 2;
                 }
-
-                #region Мартингейл
+                
 
                 if (fl == 0)
                 {
@@ -150,78 +163,90 @@ namespace paradiceinBOT
                     //error
                 }
 
-                #endregion
+            } while (true);
+        }
 
-                #region Даламбер 
+        private bool ChangeSide(bool flag)
+        {
+            if (flag)
+            {
+                side = "BELOW";
+                chance = (100 - ch).ToString();
+                chance = chance.Replace(",", ".");
+                return false;
+            }
+            else
+            {
+                side = "ABOVE";
+                chance = ch.ToString();
+                chance = chance.Replace(",", ".");
+                return true;
+            }
+        }
 
-                //lose
-                //if (fl == 0)
-                //{
+        public void Start1()
+        {
+            bool flagSide = true;
+            do
+            {
+                int fl;
 
-                //    betD = betD + baseBetD;
-                //    betS = $"{betD:f8}";
-                //    betS = betS.Replace(",", ".");
-                //    maxL++;
-                //}
-                ////win
-                //else if (fl == 1)
-                //{
-                //    betD = betD <= baseBetD ? baseBetD : betD - baseBetD;
-                //    betS = $"{betD:f8}";
-                //    betS = betS.Replace(",", ".");
-                //    maxL = 0;
-                //}
-                #endregion
+                result = Bet();
 
-                #region При победе x2, при проигрыше /2
+                if (result.Contains("win\":true"))
+                {
+                    profit = profit + betD;
 
-                ////lose
-                //if (fl == 0)
-                //{
+                    iw++;
+                    fl = 1;
 
-                //    betD = betD * 2;
-                //    betS = $"{betD:f8}";
-                //    betS = betS.Replace(",", ".");
-                //    maxL++;
-                //}
-                ////win
-                //else if (fl == 1)
-                //{
-                //    betD = betD < (betD / 2) ? baseBetD : betD / 2;
-                //    betS = $"{betD:f8}";
-                //    betS = betS.Replace(",", ".");
-                //    maxL = 0;
-                //}
+                    flagSide = ChangeSide(flagSide);
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    profit = profit - betD;
 
-                #endregion
+                    il++;
+                    fl = 0;
 
-                #region Фибоначи
-                /* Это впихнуть в начало функции
-                int ii = 0;
-                List<double> listD = new List<double>() { 0.00000001, 0.00000001, 0.00000002, 0.00000003, 0.00000005, 0.00000008, 0.00000013, 0.00000021, 0.00000034, 0.00000055, 0.00000089, 0.00000144, 0.00000223, 0.00000377, 0.00000610, 0.00000987, 0.00001597, 0.00002584, 0.00004181, 0.00006765, 0.00010946, 0.00017711, 0.00028657, 0.00046468, 0.00075025, 0.00121393, 0.00196418, 0.00317811 };
-                List<string> listS = new List<string>() { "0.00000001", "0.00000001", "0.00000002", "0.00000003", "0.00000005", "0.00000008", "0.00000013", "0.00000021", "0.00000034", "0.00000055", "0.00000089", "0.00000144", "0.00000223", "0.00000377", "0.00000610", "0.00000987", "0.00001597", "0.00002584", "0.00004181", "0.00006765", "0.00010946", "0.00017711", "0.00028657", "0.00046468", "0.00075025", "0.00121393", "0.00196418", "0.00317811" };
-                */
-                //if (fl == 0)
-                //{
-                //    ii++;
-                //    betD =listD[ii];
-                //    betS = listS[ii];
-                //    maxL++;
-                //}
-                ////win
-                //else if (fl == 1)
-                //{
+                    flagSide = ChangeSide(flagSide);
+                }
+                else
+                {
+                    fl = 2;
+                }
 
-                //    ii = ii - 2 < 0 ? 0 : ii - 2;
-                //    betD = listD[ii];
-                //    betS = listS[ii];
 
-                //    maxL = 0;
-                //}
-                #endregion
+                if (fl == 0)
+                {
+                    betD = betD * 2;
+                    betS = $"{betD:f8}";
+
+                    betS = betS.Replace(",", ".");
+
+                    maxL++;
+                    maxW = 0;
+
+                    CalculateOutputInformation();
+                }
+                else if (fl == 1)
+                {
+                    betS = baseBetS;
+                    betD = baseBetD;
+
+                    maxL = 0;
+                    maxW++;
+
+                    CalculateOutputInformation();
+                }
+                else
+                {
+                    //error
+                }
 
             } while (true);
         }
+
         private void CalculateOutputInformation()
         {
             sesMaxLose = maxL > sesMaxLose ? maxL : sesMaxLose;
@@ -232,7 +257,7 @@ namespace paradiceinBOT
         }
         private void AddBetParameter()
         {
-            request.Parameters[10].Value = s1 + betS + s2 + chan + s3 + side + s4 + сurrency + s5;
+            request.Parameters[10].Value = s1 + betS + s2 + chance + s3 + side + s4 + сurrency + s5;
         }
         private string Bet()
         {
