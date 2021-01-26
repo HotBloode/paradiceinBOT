@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using RestSharp;
 
 namespace paradiceinBOT
 {
@@ -27,22 +28,45 @@ namespace paradiceinBOT
             InitializeComponent();
         }
 
-        private void Button_Click1(object sender, RoutedEventArgs e)
+        private void f(int flag)
         {
+            Controller  contrl = new Controller(tb1,
+                Convert.ToDouble(textBet1.Text),
+                textBet1.Text.Replace(",", "."),
+                flag,
+                cb1.Text,
+                Convert.ToDouble(tbChance.Text), Convert.ToDouble(tbMulty.Text));
+            contrl.Start();
+        }
 
+        private void Button_Click1(object sender, RoutedEventArgs e)
+        {           
 
-            if (cb1.SelectedIndex == -1)
-            {
-                MessageBox.Show("Не тупи и выбери валюту");
-            }
-            else
-            {
-                Controller contr = new Controller(tb1, Convert.ToDouble(textBet1.Text), textBet1.Text.Replace(",", "."),3 ,cb1.Text, Convert.ToDouble(tbChance.Text));
+         if (cb1.SelectedIndex == -1)
+         {
+             MessageBox.Show("Не тупи и выбери валюту");
+         }
+         else
+         {
+             string checkedValue = sp.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked.Value).Content.ToString();
 
-                contr.Start();
+             int a = 0;
+                 if (checkedValue == "ABOVE")
+                 {
+                     f(1);
+                 }
+                 else if (checkedValue == "BELOW")
+                 {
+                     f(2);
+                 }
+                 else
+                 {
+                     f(3);
+                 }
 
-                (sender as Button).IsEnabled = false;
-            }
+                 (sender as Button).IsEnabled = false;
+
+         }
         }
 
         private void TextFormat_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -99,6 +123,14 @@ namespace paradiceinBOT
                         tbChance.Text = Convert.ToString(s);
                     }
                 }
+            }
+        }
+
+        private void PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
             }
         }
     }

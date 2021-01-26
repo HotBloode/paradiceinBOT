@@ -29,6 +29,7 @@ namespace paradiceinBOT
         private string side;
         private string chance;
 
+        private double percent;
         private double ch;
 
         //Валюта игры
@@ -55,12 +56,13 @@ namespace paradiceinBOT
         private string s5 = "\"\r\n    },\r\n    \"query\": \"mutation rollDice($number: Float!, $betAmount: Float!, $side: RollSideEnum!, $currency: CurrencyEnum!) {\\n  rollDice(number: $number, betAmount: $betAmount, side: $side, currency: $currency) {\\n    id\\n    number\\n    roll\\n    rollSide\\n    win\\n    betAmount\\n    winAmount\\n    currency\\n    multiplier\\n    chance\\n    game\\n    bets {\\n      pocket\\n      payout\\n      win\\n      bet\\n      __typename\\n    }\\n    winLines {\\n      id\\n      __typename\\n    }\\n    user {\\n      id\\n      login\\n      lastActivity\\n      wallets {\\n        currency\\n        balance\\n        safeAmount\\n        __typename\\n      }\\n      loyaltyLevel {\\n        level {\\n          id\\n          category\\n          level\\n          __typename\\n        }\\n        __typename\\n      }\\n      privacySettings {\\n        isPMNotificationsEnabled\\n        isWageredHidden\\n        isAnonymous\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n}";
 
 
-        public ClassBet(TextBlock frontStatusBlock, double baseBetD, string baseBetS, string сurrency, string side, string token, double ch)
+        public ClassBet(TextBlock frontStatusBlock, double baseBetD, string baseBetS, string сurrency, string side, string token, double ch, double percent)
         {
             this.frontStatusBlock = frontStatusBlock;
             this.baseBetD = baseBetD;
             this.baseBetS = baseBetS;
             this.сurrency = сurrency;
+            this.percent = percent;
 
             this.side = side;
 
@@ -117,7 +119,7 @@ namespace paradiceinBOT
 
                 if (result.Contains("win\":true"))
                 {
-                    profit = profit + betD;
+                    profit = profit + ((betD * percent) - betD);
 
                     iw++;
                     fl = 1;
@@ -138,7 +140,7 @@ namespace paradiceinBOT
 
                 if (fl == 0)
                 {
-                    betD = betD * 2;
+                    betD = betD * 10;
                     betS = $"{betD:f8}";
 
                     betS = betS.Replace(",", ".");
@@ -195,7 +197,7 @@ namespace paradiceinBOT
 
                 if (result.Contains("win\":true"))
                 {
-                    profit = profit + betD;
+                    profit = profit + ((betD * percent)- betD);
 
                     iw++;
                     fl = 1;
@@ -215,7 +217,6 @@ namespace paradiceinBOT
                 {
                     fl = 2;
                 }
-
 
                 if (fl == 0)
                 {

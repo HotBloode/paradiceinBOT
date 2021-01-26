@@ -12,6 +12,7 @@ namespace paradiceinBOT
     class Controller
     {
         private Thread ThreadFoBot;
+        private double percent;
 
         //Блок для вывода инфы
         private TextBlock frontStatusBlock;
@@ -33,7 +34,7 @@ namespace paradiceinBOT
         //Значение шанса
         private double chance;
 
-        public Controller(TextBlock frontStatusBlock, double baseBetD, string baseBetS, int ab, string сurrency, double chance)
+        public Controller(TextBlock frontStatusBlock, double baseBetD, string baseBetS, int ab, string сurrency, double chance, double percent)
         {
             using (StreamReader sr = new StreamReader(@"token.txt"))
             {
@@ -42,6 +43,7 @@ namespace paradiceinBOT
 
             //Проихнуть проверку авторизации
 
+            this.percent = percent;
             this.frontStatusBlock = frontStatusBlock;
             this.baseBetD = baseBetD;
             this.baseBetS = baseBetS;
@@ -55,19 +57,19 @@ namespace paradiceinBOT
 
             if (ab == 1)
             {
-                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "ABOVE", token, 100.0- chance);
+                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "ABOVE", token, 100.0- chance, percent);
                 ThreadFoBot = new Thread(new ThreadStart(botBet.Start));
                 ThreadFoBot.Start();
             }
             else if(ab==2)
             {
-                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "BELOW", token, chance);
+                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "BELOW", token, chance, percent);
                 ThreadFoBot = new Thread(new ThreadStart(botBet.Start));
                 ThreadFoBot.Start();
             }
             else
             {
-                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "ABOVE", token, 100.0 - chance);
+                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "ABOVE", token, 100.0 - chance, percent);
                 ThreadFoBot = new Thread(new ThreadStart(botBet.Start1));
                 ThreadFoBot.Start();
             }
