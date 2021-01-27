@@ -112,7 +112,7 @@ namespace paradiceinBOT
             {
                 if (Convert.ToDouble((sender as TextBox).Text) < 1.01 || Convert.ToDouble((sender as TextBox).Text) > 95.5)
                 {
-                    MessageBox.Show("Множитель должен быть в пределах [1,01;49,5]");
+                    MessageBox.Show("The multiplier shall be within [1,01;49,5]");
                     (sender as TextBox).Text = "";
                 }
                 else
@@ -131,6 +131,58 @@ namespace paradiceinBOT
             if (e.Key == Key.Space)
             {
                 e.Handled = true;
+            }
+        }
+
+        private void RadioButton_Checked_3(object sender, RoutedEventArgs e)
+        {
+            if (multipliedByWin != null)
+            {
+                multipliedByWin.IsEnabled = true;
+            }
+        }
+
+        private void RadioButton_Checked_2(object sender, RoutedEventArgs e)
+        {
+            if (multipliedByWin != null)
+            {
+                multipliedByWin.IsEnabled = false;
+            }
+        }
+
+        private void RadioButton_Checked_4(object sender, RoutedEventArgs e)
+        {
+            if (multipliedByLose != null)
+            {
+                multipliedByLose.IsEnabled = false;
+            }
+        }
+
+        private void RadioButton_Checked_5(object sender, RoutedEventArgs e)
+        {
+            if (multipliedByLose != null)
+            {
+                multipliedByLose.IsEnabled = true;
+            }
+        }
+
+        private void Multiplied(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void MultipliedByWin_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (Convert.ToDouble((sender as TextBox).Text) <= 1.01 || Convert.ToDouble((sender as TextBox).Text) > 49.5)
+                {
+                    MessageBox.Show("The multiplier shall be within [1,01;49,5]");
+                    (sender as TextBox).Text = "2";
+                }
             }
         }
     }
