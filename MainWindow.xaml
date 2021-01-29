@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:paradiceinBOT"
         mc:Ignorable="d"
-        Title="Paradice" Height="244.667" Width="678.208" MinWidth="260.875" MinHeight="263.6">
-    <Grid Margin="0,0,-19.6,1.4">
+        Title="Paradice" Height="244.667" Width="468.608" MinWidth="468.608" MinHeight="244.667" MaxWidth="468.608" MaxHeight="244.667">
+    <Grid Margin="0,0,3.4,1.4">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="139*"/>
-            <ColumnDefinition Width="143*"/>
-            <ColumnDefinition Width="409*"/>
+            <ColumnDefinition Width="155*"/>
+            <ColumnDefinition Width="105*"/>
+            <ColumnDefinition Width="199*"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="bt1" Content="Start" HorizontalAlignment="Left" Margin="2.8,27,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click1" Grid.Column="1" Height="19"/>
+        <Button x:Name="bt1" Content="Start" HorizontalAlignment="Left" Margin="0.8,27,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click1" Grid.Column="1" Height="19"/>
 
         <TextBlock x:Name="tb1"  HorizontalAlignment="Left" Margin="10,54,0,0" TextWrapping="Wrap" Text="Пока пусто" VerticalAlignment="Top" Height="171" Width="120"/>
 
@@ -25,30 +25,30 @@
             <TextBlock Text="DOGE"/>
             <TextBlock Text="PRDC"/>
         </ComboBox>
-        <TextBox x:Name="textBet1" HorizontalAlignment="Left" Height="19" Margin="2.8,82,0,0" TextWrapping="Wrap" Text="0,00000001" VerticalAlignment="Top" Width="75" PreviewTextInput="TextFormat_PreviewTextInput" Grid.Column="1" PreviewKeyDown="PreviewKeyDown"/>
-        <StackPanel x:Name="sp" HorizontalAlignment="Left" Height="49" Margin="5.8,106,0,0" VerticalAlignment="Top" Width="95" Grid.Column="1">
+        <TextBox x:Name="textBet1" HorizontalAlignment="Left" Height="19" Margin="0.8,82,0,0" TextWrapping="Wrap" Text="0,00000001" VerticalAlignment="Top" Width="75" PreviewTextInput="TextFormat_PreviewTextInput" Grid.Column="1" PreviewKeyDown="PreviewKeyDown" KeyDown="TextBet1_KeyDown"/>
+        <StackPanel x:Name="sp" HorizontalAlignment="Left" Height="49" Margin="3.8,106,0,0" VerticalAlignment="Top" Width="95" Grid.Column="1">
             <RadioButton Content="ABOVE" IsChecked="True"/>
             <RadioButton Content="BELOW"/>
             <RadioButton Content="lternate"/>
         </StackPanel>
-        <TextBox x:Name="tbChance"  HorizontalAlignment="Left" Height="18" Margin="90.8,163,0,0" TextWrapping="Wrap" Text="49,5" VerticalAlignment="Top" Width="36" Grid.Column="1" RenderTransformOrigin="0.531,0.407" PreviewTextInput="TextFormat_PreviewTextInput" KeyDown="TbChance_KeyDown" PreviewKeyDown="PreviewKeyDown"/>
-        <TextBox x:Name="tbMulty" HorizontalAlignment="Left" Height="19" Margin="90.8,185,0,0" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="36" Grid.Column="1" RenderTransformOrigin="-0.111,-0.653" IsEnabled="False" PreviewTextInput="TextFormat_PreviewTextInput" KeyDown="TbMulty_KeyDown" PreviewKeyDown="PreviewKeyDown"/>
-        <StackPanel HorizontalAlignment="Left" Height="41"  Margin="5.8,163,0,0" VerticalAlignment="Top" Width="80" Grid.Column="1">
+        <TextBox x:Name="tbChance"  HorizontalAlignment="Left" Height="18" Margin="83.8,163,0,0" TextWrapping="Wrap" Text="49,5" VerticalAlignment="Top" Width="36" Grid.Column="1" RenderTransformOrigin="0.531,0.407" PreviewTextInput="TextFormat_PreviewTextInput" KeyDown="TbChance_KeyDown" PreviewKeyDown="PreviewKeyDown" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="tbMulty" HorizontalAlignment="Left" Height="19" Margin="83.8,185,0,0" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="36" Grid.Column="1" RenderTransformOrigin="-0.111,-0.653" IsEnabled="False" PreviewTextInput="TextFormat_PreviewTextInput" KeyDown="TbMulty_KeyDown" PreviewKeyDown="PreviewKeyDown" Grid.ColumnSpan="2"/>
+        <StackPanel HorizontalAlignment="Left" Height="41"  Margin="3.8,163,0,0" VerticalAlignment="Top" Width="80" Grid.Column="1">
             <RadioButton x:Name="chance" Content="chance" Margin="-2,0,20,0" Checked="RadioButton_Checked" IsChecked="True"/>
             <RadioButton x:Name="multiply" Content="multiply" Checked="RadioButton_Checked_1" Margin="-2,0,2,0"/>
         </StackPanel>
 
 
-        <Canvas Grid.Column="2" HorizontalAlignment="Left" Height="63" Margin="9.6,9,0,0" VerticalAlignment="Top" Width="180">
-            <StackPanel Grid.Column="2" HorizontalAlignment="Left" Height="34" VerticalAlignment="Top" Width="99" Canvas.Top="26">
+        <Canvas Grid.Column="2" HorizontalAlignment="Left" Height="63" Margin="10,9,0,0" VerticalAlignment="Top" Width="180">
+            <StackPanel x:Name="onWin" Grid.Column="2" HorizontalAlignment="Left" Height="34" VerticalAlignment="Top" Width="99" Canvas.Top="26">
                 <RadioButton Content="to base" IsChecked="True" Checked="RadioButton_Checked_2"/>
                 <RadioButton Content="multiplied by" Checked="RadioButton_Checked_3"/>
             </StackPanel>
             <TextBox x:Name="multipliedByWin" Grid.Column="2" HorizontalAlignment="Left" Height="21" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="75" Canvas.Left="99" Canvas.Top="39" IsEnabled="False" PreviewTextInput="TextFormat_PreviewTextInput" PreviewKeyDown="Multiplied" KeyDown="MultipliedByWin_KeyDown"/>
             <Label Content="On win" Width="47"/>
         </Canvas>
-        <Canvas Grid.Column="2" HorizontalAlignment="Left" Height="63" Margin="9.6,72,0,0" VerticalAlignment="Top" Width="180">
-            <StackPanel Grid.Column="2" HorizontalAlignment="Left" Height="34" VerticalAlignment="Top" Width="99" Canvas.Top="26">
+        <Canvas Grid.Column="2" HorizontalAlignment="Left" Height="63" Margin="10,72,0,0" VerticalAlignment="Top" Width="180">
+            <StackPanel x:Name="onLose" Grid.Column="2" HorizontalAlignment="Left" Height="34" VerticalAlignment="Top" Width="99" Canvas.Top="26">
                 <RadioButton Content="to base" IsChecked="True" Checked="RadioButton_Checked_4"/>
                 <RadioButton Content="multiplied by" Checked="RadioButton_Checked_5"/>
             </StackPanel>

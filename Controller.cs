@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,44 +13,54 @@ namespace paradiceinBOT
     class Controller
     {
         private Thread ThreadFoBot;
-        private double percent;
-
+       
         //Блок для вывода инфы
         private TextBlock frontStatusBlock;
-
-        //Базовая ставка с тринге и в дабле
-        private double baseBetD;
-        private string baseBetS;
 
         //Индекс который отвечает на что ставить (больше, меньше или чередовать)
         private int ab;
 
-        //Валюта на которую играем
-        private string сurrency;
-
         private ClassBet botBet;
-
-        private string token;
 
         //Значение шанса
         private double chance;
 
-        public Controller(TextBlock frontStatusBlock, double baseBetD, string baseBetS, int ab, string сurrency, double chance, double percent)
+        private DataForBet data;
+
+        public Controller(TextBlock frontStatusBlock, double baseBetD, string baseBetS, int ab, string сurrency, double chance, double multyProfit, bool flagMultyOnWin, double multyOnWin, bool flagMultyOnLose, double multyOnLose)
         {
-            using (StreamReader sr = new StreamReader(@"token.txt"))
+            CheckAuthorization author = new CheckAuthorization();
+            int flagauthor = author.Autorization();
+
+            if (flagauthor==1)
             {
-                token = sr.ReadToEnd();
+                data = new DataForBet();
+                data.token = author.GetToken();
+                data.baseBetD = baseBetD;
+                data.baseBetS = baseBetS;
+                data.сurrency = сurrency;
+                data.multyProfit = multyProfit;
+                data.chanceD = chance;
+                data.flagMultyOnLose = flagMultyOnLose;
+                data.flagMultyOnWin = flagMultyOnWin;
+                data.multyOnLose = multyOnLose;
+                data.multyOnWin = multyOnWin;
+
+                this.chance = chance;
+
+                this.frontStatusBlock = frontStatusBlock;
+
+                this.ab = ab;
+            }
+            else if (flagauthor == 0)
+            {
+                frontStatusBlock.Text = "Token don`t work. Please check it!";
+            }
+            else
+            {
+                frontStatusBlock.Text = "Something went wrong. Check the token file!";
             }
 
-            //Проихнуть проверку авторизации
-
-            this.percent = percent;
-            this.frontStatusBlock = frontStatusBlock;
-            this.baseBetD = baseBetD;
-            this.baseBetS = baseBetS;
-            this.ab = ab;
-            this.сurrency = сurrency;
-            this.chance = chance;
         }
 
         public void Start()
@@ -57,25 +68,90 @@ namespace paradiceinBOT
 
             if (ab == 1)
             {
-                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "ABOVE", token, 100.0- chance, percent);
-                ThreadFoBot = new Thread(new ThreadStart(botBet.Start));
-                ThreadFoBot.Start();
+                data.side = "ABOVE";
+                data.chanceS = Convert.ToString(100.0 - chance);
+                botBet = new ClassBet(frontStatusBlock, data);
+
+                if (!data.flagMultyOnLose && !data.flagMultyOnWin)
+                {
+                    ThreadFoBot = new Thread(botBet.StartNormally);
+                }
+                else if(data.flagMultyOnWin&& data.flagMultyOnLose)
+                {
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnWinLoseNormally);
+                }
+                else if (data.flagMultyOnLose)
+                {
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnLoseNormally);
+                }
+                else if (data.flagMultyOnWin)
+                {
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnWinNormally);
+                }
             }
-            else if(ab==2)
+            else if (ab == 2)
             {
-                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "BELOW", token, chance, percent);
-                ThreadFoBot = new Thread(new ThreadStart(botBet.Start));
-                ThreadFoBot.Start();
+                data.side = "BELOW";
+                data.chanceS = Convert.ToString(chance);
+                botBet = new ClassBet(frontStatusBlock, data);
+
+                if (!data.flagMultyOnLose && !data.flagMultyOnWin)
+                {
+                    ThreadFoBot = new Thread(botBet.StartNormally);
+                }
+                else if (data.flagMultyOnWin && data.flagMultyOnLose)
+                {
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnWinLoseNormally);
+                }
+                else if (data.flagMultyOnLose)
+                {
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnLoseNormally);
+                }
+                else if (data.flagMultyOnWin)
+                {
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnWinNormally);
+                }
             }
             else
             {
-                botBet = new ClassBet(frontStatusBlock, baseBetD, baseBetS, сurrency, "ABOVE", token, 100.0 - chance, percent);
-                ThreadFoBot = new Thread(new ThreadStart(botBet.Start1));
-                ThreadFoBot.Start();
+                data.side = "ABOVE";
+                data.chanceS = Convert.ToString(100.0 - chance);
+                botBet = new ClassBet(frontStatusBlock, data);
+
+                if (!data.flagMultyOnLose && !data.flagMultyOnWin)
+                {
+                    ThreadFoBot = new Thread(botBet.StartNormallyWinthChangeSide);
+                }
+                else if (data.flagMultyOnWin && data.flagMultyOnLose)
+                {
+
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnWinLoseWithChangeSide);
+                }
+                else if (data.flagMultyOnLose)
+                {
+
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnLoseWinthChangeSide);
+                }
+                else if (data.flagMultyOnWin)
+                {
+
+                    ThreadFoBot = new Thread(botBet.StartWithMultOnWinWithChangeSide);
+                }
+
             }
-           
+
+            ThreadFoBot.IsBackground = true;
+            ThreadFoBot.Start();
         }
 
+        public void OnOut()
+        {
+            ThreadFoBot.Suspend();
+        }
 
+        public void OnIn()
+        {
+            ThreadFoBot.Resume();
+        }
     }
 }

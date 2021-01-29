@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,51 +23,172 @@ namespace paradiceinBOT
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        private int flagSide;
+        private bool flagMultyOnWin;
+        private bool flagMultyOnLose;
+        private Controller controller;
+       
         public MainWindow()
         {
             InitializeComponent();
+            Microsoft.Win32.SystemEvents.SessionSwitch += OnIn;
+            Microsoft.Win32.SystemEvents.SessionEnding += OnOut;
         }
 
-        private void f(int flag)
+        void OnIn(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
         {
-            Controller  contrl = new Controller(tb1,
+            controller.OnIn();
+
+        }
+
+        void OnOut(object sender, Microsoft.Win32.SessionEndingEventArgs e)
+        {
+            controller.OnOut();
+        }
+
+
+
+
+        private void AddInfAndStart()
+        {
+
+            controller = new Controller(tb1,
                 Convert.ToDouble(textBet1.Text),
                 textBet1.Text.Replace(",", "."),
-                flag,
+                flagSide,
                 cb1.Text,
-                Convert.ToDouble(tbChance.Text), Convert.ToDouble(tbMulty.Text));
-            contrl.Start();
+                Convert.ToDouble(tbChance.Text),
+                Convert.ToDouble(tbMulty.Text),
+                flagMultyOnWin,
+                Convert.ToDouble(multipliedByWin.Text),
+                flagMultyOnLose,
+                Convert.ToDouble(multipliedByLose.Text));
+
+            controller.Start();
         }
 
+        private void SiarchFlagSide()
+        {
+            string checkedValue = sp.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked.Value).Content.ToString();
+            if (checkedValue == "ABOVE")
+            {
+                flagSide = 1;
+            }
+            else if (checkedValue == "BELOW")
+            {
+                flagSide = 2;
+            }
+            else
+            {
+                flagSide = 3;
+            }
+        }
+
+        private void SiarchFlagMultOnWin()
+        {
+            string checkedValue = onWin.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked.Value).Content.ToString();
+            if (checkedValue == "multiplied by")
+            {
+                flagMultyOnWin = true;
+            }
+            else
+            {
+                flagMultyOnWin = false;
+            }
+        }
+
+        private void SiarchFlagMultOnLose()
+        {
+            string checkedValue = onLose.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked.Value).Content.ToString();
+            if (checkedValue == "multiplied by")
+            {
+                flagMultyOnLose = true;
+            }
+            else
+            {
+                flagMultyOnLose = false;
+            }
+        }
+
+        #region CheckFunk
+
+        private bool CheckChance()
+        {
+            if (tbChance == null || tbChance.Text == "" || Convert.ToDouble(tbChance.Text) < 2 || Convert.ToDouble(tbChance.Text) > 98)
+            {
+                MessageBox.Show("Chance must be within [2;98]");
+                tbChance.Text = "45";
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private bool CheckmMultiply()
+        {
+            if (tbMulty == null || tbMulty.Text == ""||Convert.ToDouble(tbMulty.Text) < 1.01 || Convert.ToDouble(tbMulty.Text) > 95.5)
+            {
+                MessageBox.Show("The multiplier shall be within [1,01;49,5]");
+                tbMulty.Text = "2,2";
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+        }
+
+        private bool CheckMultOnWinLose(TextBox box)
+        {
+            if (box == null || box.Text == ""||Convert.ToDouble(box.Text) <= 1.01 || Convert.ToDouble(box.Text) > 49.5)
+            {
+                MessageBox.Show("The multiplier shall be within [1,01;50]");
+               box.Text = "2";
+               return false;
+
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private bool CheckBet()
+        {
+            if (textBet1 == null || textBet1.Text == "")
+            {
+                MessageBox.Show("The bet line must be filled!");
+                textBet1.Text = "0,00000001";
+                return false;
+
+            }
+            else
+            {
+                return true;
+            }
+        }
+        #endregion
+
         private void Button_Click1(object sender, RoutedEventArgs e)
-        {           
+        {
+            if (cb1.SelectedIndex == -1)
+            {
+                MessageBox.Show("Не тупи и выбери валюту");
+            }
+            else
+            {
+                if (CheckChance() && CheckmMultiply()&& CheckMultOnWinLose(multipliedByWin) && CheckMultOnWinLose(multipliedByLose)&& CheckBet())
+                {
+                    SiarchFlagSide();
+                    SiarchFlagMultOnLose();
 
-         if (cb1.SelectedIndex == -1)
-         {
-             MessageBox.Show("Не тупи и выбери валюту");
-         }
-         else
-         {
-             string checkedValue = sp.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked.Value).Content.ToString();
-
-             int a = 0;
-                 if (checkedValue == "ABOVE")
-                 {
-                     f(1);
-                 }
-                 else if (checkedValue == "BELOW")
-                 {
-                     f(2);
-                 }
-                 else
-                 {
-                     f(3);
-                 }
-
-                 (sender as Button).IsEnabled = false;
-
-         }
+                    AddInfAndStart();
+                    (sender as Button).IsEnabled = false;
+                }
+            }
         }
 
         private void TextFormat_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -85,19 +207,15 @@ namespace paradiceinBOT
             tbChance.IsEnabled = false;
             tbMulty.IsEnabled = true;
         }
-        
+
+        #region KeyDown
         private void TbChance_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 if ((sender as TextBox).IsEnabled)
                 {
-                    if (Convert.ToDouble((sender as TextBox).Text)<2 || Convert.ToDouble((sender as TextBox).Text)>98)
-                    {
-                        MessageBox.Show("Шанс должен быть в пределах [2;98]");
-                        (sender as TextBox).Text = "";
-                    }
-                    else
+                    if (CheckChance())
                     {
                         double s = 99.0 / Convert.ToDouble((sender as TextBox).Text);
                         tbMulty.Text = Convert.ToString(s);
@@ -110,12 +228,7 @@ namespace paradiceinBOT
         {
             if (e.Key == Key.Enter)
             {
-                if (Convert.ToDouble((sender as TextBox).Text) < 1.01 || Convert.ToDouble((sender as TextBox).Text) > 95.5)
-                {
-                    MessageBox.Show("The multiplier shall be within [1,01;49,5]");
-                    (sender as TextBox).Text = "";
-                }
-                else
+                if (CheckmMultiply())
                 {
                     if ((sender as TextBox).IsEnabled)
                     {
@@ -126,6 +239,14 @@ namespace paradiceinBOT
             }
         }
 
+        private void MultipliedByWin_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CheckMultOnWinLose(sender as TextBox);
+            }
+        }
+
         private void PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
@@ -133,6 +254,15 @@ namespace paradiceinBOT
                 e.Handled = true;
             }
         }
+
+        private void TextBet1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CheckBet();
+            }
+        }
+        #endregion
 
         private void RadioButton_Checked_3(object sender, RoutedEventArgs e)
         {
@@ -174,16 +304,5 @@ namespace paradiceinBOT
             }
         }
 
-        private void MultipliedByWin_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                if (Convert.ToDouble((sender as TextBox).Text) <= 1.01 || Convert.ToDouble((sender as TextBox).Text) > 49.5)
-                {
-                    MessageBox.Show("The multiplier shall be within [1,01;49,5]");
-                    (sender as TextBox).Text = "2";
-                }
-            }
-        }
     }
 }

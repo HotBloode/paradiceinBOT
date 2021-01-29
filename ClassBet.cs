@@ -7,6 +7,10 @@ namespace paradiceinBOT
 {
     public class ClassBet
     {
+        private DataForBet dataForBet;
+        private DataForRequest dataForRequest;
+        private RequestWithData requestWithData;
+
         //Токен авторизации
         private string token;
 
@@ -45,59 +49,362 @@ namespace paradiceinBOT
         //Блок инфы
         private TextBlock frontStatusBlock;
 
-        //Клиент для запросов
-        private RestClient client = new RestClient("https://api.paradice.in/api.php");
-        RestRequest request = new RestRequest(Method.POST);
-
-        private string s1 = "{\r\n    \"operationName\": \"rollDice\",\r\n    \"variables\": {\r\n        \"betAmount\": \"";
-        private string s2 = "\",\r\n        \"number\": \"";
-        private string s3 = "\",\r\n        \"side\": \"";
-        private string s4 = "\",\r\n        \"currency\": \"";
-        private string s5 = "\"\r\n    },\r\n    \"query\": \"mutation rollDice($number: Float!, $betAmount: Float!, $side: RollSideEnum!, $currency: CurrencyEnum!) {\\n  rollDice(number: $number, betAmount: $betAmount, side: $side, currency: $currency) {\\n    id\\n    number\\n    roll\\n    rollSide\\n    win\\n    betAmount\\n    winAmount\\n    currency\\n    multiplier\\n    chance\\n    game\\n    bets {\\n      pocket\\n      payout\\n      win\\n      bet\\n      __typename\\n    }\\n    winLines {\\n      id\\n      __typename\\n    }\\n    user {\\n      id\\n      login\\n      lastActivity\\n      wallets {\\n        currency\\n        balance\\n        safeAmount\\n        __typename\\n      }\\n      loyaltyLevel {\\n        level {\\n          id\\n          category\\n          level\\n          __typename\\n        }\\n        __typename\\n      }\\n      privacySettings {\\n        isPMNotificationsEnabled\\n        isWageredHidden\\n        isAnonymous\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n}";
-
-
-        public ClassBet(TextBlock frontStatusBlock, double baseBetD, string baseBetS, string сurrency, string side, string token, double ch, double percent)
+     
+        public ClassBet(TextBlock frontStatusBlock, DataForBet data)
         {
+            this.dataForBet = data;
             this.frontStatusBlock = frontStatusBlock;
-            this.baseBetD = baseBetD;
-            this.baseBetS = baseBetS;
-            this.сurrency = сurrency;
-            this.percent = percent;
 
-            this.side = side;
+            dataForRequest = new DataForRequest();
+            dataForRequest.token = dataForBet.token;
+            dataForRequest.сurrency = dataForBet.сurrency;
 
-            betD = this.baseBetD;
-            betS = this.baseBetS;
+            requestWithData = new RequestWithData(dataForRequest);
 
+            
             maxL = 0;
             maxW = 0;
-
-            this.token = token;
-
-            this.ch = ch;
 
             chance = ch.ToString();
             chance = chance.Replace(",", ".");
 
-            AddParametersToRequest();
+            dataForBet.betS = $"{dataForBet.baseBetD:f8}";
+            dataForBet.betS = dataForBet.betS.Replace(",", ".");
+            dataForBet.betD = dataForBet.baseBetD;
         }
 
-        private void AddParametersToRequest()
+        private void СopyData()
         {
-            client.Timeout = -1;
-            request.AddHeader("sec-ch-ua", "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"");
-            request.AddHeader("DNT", "1");
-            request.AddHeader("sec-ch-ua-mobile", "?0");
-            request.AddHeader("Authorization", token);
-            request.AddHeader("content-type", "application/json");
-            request.AddHeader("accept", "*/*");
-            client.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36";
-            request.AddHeader("Sec-Fetch-Site", "same-site");
-            request.AddHeader("Sec-Fetch-Mode", "cors");
-            request.AddHeader("Sec-Fetch-Dest", "empty");
-            request.AddHeader("Cookie", "__cfduid=d05ec5fcc4e574b8c77a5e81dc51caa411607638398; _ga=GA1.2.1474332697.1608739211");
-            request.AddParameter("application/json", s1 + betS + s2 + chance + s3 + side + s4 + сurrency + s5, ParameterType.RequestBody);
+            dataForRequest.bet = dataForBet.betS;
+            dataForRequest.side = dataForBet.side;
+            dataForRequest.chance = dataForBet.chanceS;
         }
+
+
+        public void StartNormally()
+        {
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.baseBetD * dataForBet.multyProfit) - dataForBet.baseBetD);
+
+                    iw++;
+
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.baseBetD;
+
+                    il++;
+
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+                }
+                else
+                {
+                    //error
+                }
+
+
+            } while (true);
+        }
+        public void StartNormallyWinthChangeSide()
+        {
+            bool flagSide = true;
+
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.baseBetD * dataForBet.multyProfit) - dataForBet.baseBetD);
+
+                    iw++;
+
+                    maxL = 0;
+                    maxW++;
+
+                    flagSide = ChangeSide(flagSide);
+
+                    CalculateOutputInformation();
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -=  dataForBet.baseBetD;
+
+                    il++;
+
+                    maxL++;
+                    maxW = 0;
+
+                    flagSide = ChangeSide(flagSide);
+
+                    CalculateOutputInformation();
+                }
+                else
+                {
+                    //error
+                }
+
+
+            } while (true);
+        }
+
+        public void StartWithMultOnWinNormally()
+        {
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
+                    iw++;
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnWin;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.betD;
+                    il++;
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.baseBetD;
+                    dataForBet.betS = dataForBet.baseBetS;
+                }
+                else
+                {
+                   //error
+                }
+            } while (true);
+        }
+
+        public void StartWithMultOnWinWithChangeSide()
+        {
+            
+            bool flagSide = true;
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
+                    iw++;
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnWin;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+
+                    flagSide = ChangeSide(flagSide);
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.betD;
+                    il++;
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.baseBetD;
+                    dataForBet.betS = dataForBet.baseBetS;
+
+                    flagSide = ChangeSide(flagSide);
+                }
+                else
+                {
+                    //error
+                }
+            } while (true);
+        }
+
+        public void StartWithMultOnLoseNormally()
+        {
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
+                    iw++;
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.baseBetD;
+                    dataForBet.betS = dataForBet.baseBetS;
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.betD;
+                    il++;
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnLose;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+                }
+                else
+                {
+                    //error
+                }
+            } while (true);
+        }
+
+        public void StartWithMultOnLoseWinthChangeSide()
+        {
+            bool flagSide = true;
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
+                    iw++;
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.baseBetD;
+                    dataForBet.betS = dataForBet.baseBetS;
+
+                    flagSide = ChangeSide(flagSide);
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.betD;
+                    il++;
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnLose;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+
+                    flagSide = ChangeSide(flagSide);
+                }
+                else
+                {
+                    //error
+                }
+            } while (true);
+        }
+
+        public void StartWithMultOnWinLoseNormally()
+        {
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
+                    iw++;
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnWin;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.betD;
+                    il++;
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnLose;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+                }
+                else
+                {
+                    //error
+                }
+            } while (true);
+        }
+        public void StartWithMultOnWinLoseWithChangeSide()
+        {
+            bool flagSide = true;
+            do
+            {
+                СopyData();
+                result = requestWithData.TakeBet();
+
+                if (result.Contains("win\":true"))
+                {
+                    dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
+                    iw++;
+                    maxL = 0;
+                    maxW++;
+                    CalculateOutputInformation();
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnWin;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+
+                    flagSide = ChangeSide(flagSide);
+                }
+                else if (result.Contains("win\":false"))
+                {
+                    dataForBet.profit -= dataForBet.baseBetD;
+                    il++;
+                    maxL++;
+                    maxW = 0;
+                    CalculateOutputInformation();
+
+
+                    dataForBet.betD = dataForBet.betD * dataForBet.multyOnLose;
+                    dataForBet.betS = $"{dataForBet.betD:f8}";
+                    dataForBet.betS = dataForBet.betS.Replace(",", ".");
+
+                    flagSide = ChangeSide(flagSide);
+                }
+                else
+                {
+                    //error
+                }
+            } while (true);
+        }
+       
+
         private void InfOut()
         {
             frontStatusBlock.Dispatcher.Invoke(new Action(() => frontStatusBlock.Text =
@@ -106,171 +413,35 @@ namespace paradiceinBOT
                 "\nПоражения " + il +
                 "\nMaxLose " + sesMaxLose +
                 "\nMaxWin " + sesMaxWin +
-                "\nПрофит " + $"{profit:f8}"));
-        }
-
-        public void Start()
-        {
-            do
-            {
-                int fl;
-
-                result = Bet();
-
-                if (result.Contains("win\":true"))
-                {
-                    profit = profit + ((betD * percent) - betD);
-
-                    iw++;
-                    fl = 1;
-                    
-                }
-                else if (result.Contains("win\":false"))
-                {
-                    profit = profit - betD;
-
-                    il++;
-                    fl = 0;
-                }
-                else
-                {
-                    fl = 2;
-                }
-                
-
-                if (fl == 0)
-                {
-                    betD = betD * 10;
-                    betS = $"{betD:f8}";
-
-                    betS = betS.Replace(",", ".");
-
-                    maxL++;
-                    maxW = 0;
-
-                    CalculateOutputInformation();
-                }
-                else if (fl == 1)
-                {
-                    betS = baseBetS;
-                    betD = baseBetD;
-
-                    maxL = 0;
-                    maxW++;
-
-                    CalculateOutputInformation();
-                }
-                else
-                {
-                    //error
-                }
-
-            } while (true);
+                "\nПрофит " + $"{dataForBet.profit:f8}"));
         }
 
         private bool ChangeSide(bool flag)
         {
             if (flag)
             {
-                side = "BELOW";
-                chance = (100 - ch).ToString();
-                chance = chance.Replace(",", ".");
+                dataForBet.side = "BELOW";
+                dataForBet.chanceS = (100 - dataForBet.chanceD).ToString();
+                dataForBet.chanceS = dataForBet.chanceS.Replace(",", ".");
                 return false;
             }
             else
             {
-                side = "ABOVE";
-                chance = ch.ToString();
-                chance = chance.Replace(",", ".");
+                dataForBet.side = "ABOVE";
+                dataForBet.chanceS =  dataForBet.chanceD.ToString();
+                dataForBet.chanceS = dataForBet.chanceS.Replace(",", ".");
+
                 return true;
             }
-        }
-
-        public void Start1()
-        {
-            bool flagSide = true;
-            do
-            {
-                int fl;
-
-                result = Bet();
-
-                if (result.Contains("win\":true"))
-                {
-                    profit = profit + ((betD * percent)- betD);
-
-                    iw++;
-                    fl = 1;
-
-                    flagSide = ChangeSide(flagSide);
-                }
-                else if (result.Contains("win\":false"))
-                {
-                    profit = profit - betD;
-
-                    il++;
-                    fl = 0;
-
-                    flagSide = ChangeSide(flagSide);
-                }
-                else
-                {
-                    fl = 2;
-                }
-
-                if (fl == 0)
-                {
-                    betD = betD * 2;
-                    betS = $"{betD:f8}";
-
-                    betS = betS.Replace(",", ".");
-
-                    maxL++;
-                    maxW = 0;
-
-                    CalculateOutputInformation();
-                }
-                else if (fl == 1)
-                {
-                    betS = baseBetS;
-                    betD = baseBetD;
-
-                    maxL = 0;
-                    maxW++;
-
-                    CalculateOutputInformation();
-                }
-                else
-                {
-                    //error
-                }
-
-            } while (true);
         }
 
         private void CalculateOutputInformation()
         {
             sesMaxLose = maxL > sesMaxLose ? maxL : sesMaxLose;
             sesMaxWin = maxW > sesMaxWin ? maxW : sesMaxWin;
-
             i++;
             InfOut();
         }
-        private void AddBetParameter()
-        {
-            request.Parameters[10].Value = s1 + betS + s2 + chance + s3 + side + s4 + сurrency + s5;
-        }
-        private string Bet()
-        {
-            AddBetParameter();
-
-            IRestResponse response = client.Execute(request);
-
-            //Для вытягивания инфы из ответа
-            //var weather = JsonConvert.DeserializeObject<Rootobject>(response.Content);
-            // File.WriteAllText("123.json", JsonConvert.SerializeObject(response.Content));
-
-            return response.Content;
-        }
+       
     }
 }
