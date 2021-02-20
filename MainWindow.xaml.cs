@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
@@ -15,6 +16,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using RestSharp;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace paradiceinBOT
 {
@@ -172,6 +175,44 @@ namespace paradiceinBOT
         }
         #endregion
 
+        private List<double> deserializedProduct = new List<double>();
+        async  void test()
+        {
+            //List<double> list = new List<double>();
+            //list.Add(0.123);
+            //list.Add(0.124);
+            //list.Add(0.125);
+            //list.Add(0.126);
+            //list.Add(0.124);
+
+            //JsonSerializer serializer = new JsonSerializer();
+
+            //using (StreamWriter sw = new StreamWriter(@"user.json"))
+            //using (JsonWriter writer = new JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, list);
+            //}
+            string str;
+            double d = 0.12345678910;
+            using (StreamReader sr = new StreamReader(@"user.json"))
+            {
+                str = sr.ReadToEnd();
+            }
+
+            int b = 0;
+
+            using (StreamWriter sw = new StreamWriter(@"user.json", true))
+            {
+                sw.Write($"{d:f8},");
+            }
+
+            using (StreamReader sr = new StreamReader(@"user.json"))
+            {
+                str = sr.ReadToEnd();
+            }
+
+            int a = 0;
+        }
         private void Button_Click1(object sender, RoutedEventArgs e)
         {
             if (cb1.SelectedIndex == -1)
@@ -180,7 +221,7 @@ namespace paradiceinBOT
             }
             else
             {
-                if (CheckChance() && CheckmMultiply()&& CheckMultOnWinLose(multipliedByWin) && CheckMultOnWinLose(multipliedByLose)&& CheckBet())
+                if (CheckChance() && CheckmMultiply() && CheckMultOnWinLose(multipliedByWin) && CheckMultOnWinLose(multipliedByLose) && CheckBet())
                 {
                     SiarchFlagSide();
                     SiarchFlagMultOnLose();
@@ -304,5 +345,9 @@ namespace paradiceinBOT
             }
         }
 
+        private void SpumStatistic_Click(object sender, RoutedEventArgs e)
+        {
+            controller.OnceSpam();
+        }
     }
 }

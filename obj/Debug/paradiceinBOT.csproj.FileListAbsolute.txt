@@ -16,3 +16,5 @@ C:\Users\Andrey\source\repos\paradiceinBOT\obj\Debug\paradiceinBOT.csproj.CopyCo
 C:\Users\Andrey\source\repos\paradiceinBOT\obj\Debug\paradiceinBOT.exe
 C:\Users\Andrey\source\repos\paradiceinBOT\obj\Debug\paradiceinBOT.pdb
 C:\Users\Andrey\source\repos\paradiceinBOT\obj\Debug\paradiceinBOT.csprojAssemblyReference.cache
+C:\Users\Andrey\source\repos\paradiceinBOT\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Andrey\source\repos\paradiceinBOT\bin\Debug\Newtonsoft.Json.xml

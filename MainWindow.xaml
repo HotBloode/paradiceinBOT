@@ -55,6 +55,7 @@
             <TextBox x:Name="multipliedByLose" Grid.Column="2" HorizontalAlignment="Left" Height="21" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="75" Canvas.Left="99" Canvas.Top="39" IsEnabled="False" PreviewTextInput="TextFormat_PreviewTextInput" PreviewKeyDown="Multiplied" KeyDown="MultipliedByWin_KeyDown"/>
             <Label Content="On lose" Width="57"/>
         </Canvas>
+        <Button x:Name="SpumStatistic" Content="SpumStatistic" Grid.Column="2" HorizontalAlignment="Left" Margin="113,181,0,0" VerticalAlignment="Top" Width="81" Click="SpumStatistic_Click"/>
 
 
     </Grid>

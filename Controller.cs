@@ -13,6 +13,8 @@ namespace paradiceinBOT
     class Controller
     {
         private Thread ThreadFoBot;
+        private WriteReadFile dataWiter;
+        private RequestWithStatistic requestWithStatistic;
        
         //Блок для вывода инфы
         private TextBlock frontStatusBlock;
@@ -51,6 +53,9 @@ namespace paradiceinBOT
                 this.frontStatusBlock = frontStatusBlock;
 
                 this.ab = ab;
+
+                dataWiter = new WriteReadFile();
+                requestWithStatistic = new RequestWithStatistic(data, dataWiter);
             }
             else if (flagauthor == 0)
             {
@@ -63,6 +68,11 @@ namespace paradiceinBOT
 
         }
 
+        public void OnceSpam()
+        {
+            requestWithStatistic.RequestToSite();
+        }
+
         public void Start()
         {
 
@@ -70,7 +80,7 @@ namespace paradiceinBOT
             {
                 data.side = "ABOVE";
                 data.chanceS = Convert.ToString(100.0 - chance);
-                botBet = new ClassBet(frontStatusBlock, data);
+                botBet = new ClassBet(frontStatusBlock, data, dataWiter);
 
                 if (!data.flagMultyOnLose && !data.flagMultyOnWin)
                 {
@@ -93,7 +103,7 @@ namespace paradiceinBOT
             {
                 data.side = "BELOW";
                 data.chanceS = Convert.ToString(chance);
-                botBet = new ClassBet(frontStatusBlock, data);
+                botBet = new ClassBet(frontStatusBlock, data, dataWiter);
 
                 if (!data.flagMultyOnLose && !data.flagMultyOnWin)
                 {
@@ -116,7 +126,7 @@ namespace paradiceinBOT
             {
                 data.side = "ABOVE";
                 data.chanceS = Convert.ToString(100.0 - chance);
-                botBet = new ClassBet(frontStatusBlock, data);
+                botBet = new ClassBet(frontStatusBlock, data, dataWiter);
 
                 if (!data.flagMultyOnLose && !data.flagMultyOnWin)
                 {

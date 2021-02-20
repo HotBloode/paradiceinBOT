@@ -42,7 +42,7 @@ namespace paradiceinBOT
         {
             request.Parameters[10].Value = s1 + data.bet + s2 + data.chance.Replace(",", ".") + s3 + data.side + s4 + data.сurrency + s5;
         }
-        public string TakeBet()
+        public string RequestToSite()
         {
             AddBetParameter();
             IRestResponse response = client.Execute(request);
