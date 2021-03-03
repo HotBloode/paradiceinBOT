@@ -50,7 +50,7 @@ namespace paradiceinBOT
         }
     
 
-    public void ReCreateFile()
+        public void ReCreateFile()
         {
             File.Delete("wagered.json");
             FileStream fs = File.Create("wagered.json");

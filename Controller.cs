@@ -13,6 +13,7 @@ namespace paradiceinBOT
     class Controller
     {
         private Thread ThreadFoBot;
+        private Thread ThreadOfSpamMins;
         private WriteReadFile dataWiter;
         private RequestWithStatistic requestWithStatistic;
        
@@ -24,12 +25,33 @@ namespace paradiceinBOT
 
         private ClassBet botBet;
 
-        //Значение шанса
+        //chance of win 
         private double chance;
 
         private DataForBet data;
 
-        public Controller(TextBlock frontStatusBlock, double baseBetD, string baseBetS, int ab, string сurrency, double chance, double multyProfit, bool flagMultyOnWin, double multyOnWin, bool flagMultyOnLose, double multyOnLose)
+        //flags of spam
+        private bool flagOfSpamOnBets;
+        private bool flagOfSpamOnMins;
+
+        private int mins;
+        private int bets;
+
+        public Controller(TextBlock frontStatusBlock,
+            double baseBetD,
+            string baseBetS,
+            int ab,
+            string сurrency,
+            double chance,
+            double multyProfit,
+            bool flagMultyOnWin,
+            double multyOnWin,
+            bool flagMultyOnLose,
+            double multyOnLose,
+            bool flagOfSpamOnBets,
+            bool flagOfSpamOnMins,
+            int mins,
+            int bets)
         {
             CheckAuthorization author = new CheckAuthorization();
             int flagauthor = author.Autorization();
@@ -56,6 +78,12 @@ namespace paradiceinBOT
 
                 dataWiter = new WriteReadFile();
                 requestWithStatistic = new RequestWithStatistic(data, dataWiter);
+
+                this.flagOfSpamOnBets = flagOfSpamOnBets;
+                this.flagOfSpamOnMins = flagOfSpamOnMins;
+                this.mins = mins;
+                this.bets = bets;
+
             }
             else if (flagauthor == 0)
             {
@@ -73,6 +101,12 @@ namespace paradiceinBOT
             requestWithStatistic.RequestToSite();
         }
 
+        public void Stop()
+        {
+            ThreadFoBot.Abort();
+            ThreadOfSpamMins.Abort();
+        }
+
         public void Start()
         {
 
@@ -80,7 +114,7 @@ namespace paradiceinBOT
             {
                 data.side = "ABOVE";
                 data.chanceS = Convert.ToString(100.0 - chance);
-                botBet = new ClassBet(frontStatusBlock, data, dataWiter);
+                botBet = new ClassBet(frontStatusBlock, data, dataWiter, bets, flagOfSpamOnBets, requestWithStatistic);
 
                 if (!data.flagMultyOnLose && !data.flagMultyOnWin)
                 {
@@ -103,7 +137,7 @@ namespace paradiceinBOT
             {
                 data.side = "BELOW";
                 data.chanceS = Convert.ToString(chance);
-                botBet = new ClassBet(frontStatusBlock, data, dataWiter);
+                botBet = new ClassBet(frontStatusBlock, data, dataWiter, bets, flagOfSpamOnBets, requestWithStatistic);
 
                 if (!data.flagMultyOnLose && !data.flagMultyOnWin)
                 {
@@ -126,7 +160,7 @@ namespace paradiceinBOT
             {
                 data.side = "ABOVE";
                 data.chanceS = Convert.ToString(100.0 - chance);
-                botBet = new ClassBet(frontStatusBlock, data, dataWiter);
+                botBet = new ClassBet(frontStatusBlock, data, dataWiter, bets, flagOfSpamOnBets, requestWithStatistic);
 
                 if (!data.flagMultyOnLose && !data.flagMultyOnWin)
                 {
@@ -152,16 +186,33 @@ namespace paradiceinBOT
 
             ThreadFoBot.IsBackground = true;
             ThreadFoBot.Start();
+
+            if (flagOfSpamOnMins)
+            {
+                ThreadOfSpamMins = new Thread(SpamMins);
+                ThreadOfSpamMins.Start();
+            }
+        }
+
+        private void SpamMins()
+        {
+            while (true)
+            {
+                Thread.Sleep(mins * 60000);
+                OnceSpam();
+            }
         }
 
         public void OnOut()
         {
             ThreadFoBot.Suspend();
+            ThreadOfSpamMins.Suspend();
         }
 
         public void OnIn()
         {
             ThreadFoBot.Resume();
+            ThreadOfSpamMins.Resume();
         }
     }
 }

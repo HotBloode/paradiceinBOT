@@ -49,9 +49,6 @@ namespace paradiceinBOT
             controller.OnOut();
         }
 
-
-
-
         private void AddInfAndStart()
         {
 
@@ -65,7 +62,12 @@ namespace paradiceinBOT
                 flagMultyOnWin,
                 Convert.ToDouble(multipliedByWin.Text),
                 flagMultyOnLose,
-                Convert.ToDouble(multipliedByLose.Text));
+                Convert.ToDouble(multipliedByLose.Text),
+                rbBets.IsChecked.Value,
+                rbMins.IsChecked.Value,
+                Convert.ToInt32(mins.Text),
+                Convert.ToInt32(bets.Text)
+                );
 
             controller.Start();
         }
@@ -159,6 +161,34 @@ namespace paradiceinBOT
             }
         }
 
+        private bool CheckMins(TextBox box)
+        {
+            if (box == null || box.Text == "" || Convert.ToDouble(box.Text) < 5 || Convert.ToDouble(box.Text) > 24)
+            {
+                MessageBox.Show("The mins shall be within [5;3600]");
+                box.Text = "10";
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private bool CheckBets(TextBox box)
+        {
+            if (box == null || box.Text == "" || Convert.ToDouble(box.Text) < 100 || Convert.ToDouble(box.Text) > 100000)
+            {
+                MessageBox.Show("The number of bets shall be within [100;100000]");
+                box.Text = "100000";
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         private bool CheckBet()
         {
             if (textBet1 == null || textBet1.Text == "")
@@ -176,43 +206,7 @@ namespace paradiceinBOT
         #endregion
 
         private List<double> deserializedProduct = new List<double>();
-        async  void test()
-        {
-            //List<double> list = new List<double>();
-            //list.Add(0.123);
-            //list.Add(0.124);
-            //list.Add(0.125);
-            //list.Add(0.126);
-            //list.Add(0.124);
-
-            //JsonSerializer serializer = new JsonSerializer();
-
-            //using (StreamWriter sw = new StreamWriter(@"user.json"))
-            //using (JsonWriter writer = new JsonTextWriter(sw))
-            //{
-            //    serializer.Serialize(writer, list);
-            //}
-            string str;
-            double d = 0.12345678910;
-            using (StreamReader sr = new StreamReader(@"user.json"))
-            {
-                str = sr.ReadToEnd();
-            }
-
-            int b = 0;
-
-            using (StreamWriter sw = new StreamWriter(@"user.json", true))
-            {
-                sw.Write($"{d:f8},");
-            }
-
-            using (StreamReader sr = new StreamReader(@"user.json"))
-            {
-                str = sr.ReadToEnd();
-            }
-
-            int a = 0;
-        }
+        
         private void Button_Click1(object sender, RoutedEventArgs e)
         {
             if (cb1.SelectedIndex == -1)
@@ -221,13 +215,16 @@ namespace paradiceinBOT
             }
             else
             {
-                if (CheckChance() && CheckmMultiply() && CheckMultOnWinLose(multipliedByWin) && CheckMultOnWinLose(multipliedByLose) && CheckBet())
+                if (CheckChance() && CheckmMultiply() && CheckMultOnWinLose(multipliedByWin) && CheckMultOnWinLose(multipliedByLose) && CheckBet()&&CheckMins(mins) && CheckBets(bets))
                 {
                     SiarchFlagSide();
                     SiarchFlagMultOnLose();
-
+                    SiarchFlagMultOnWin();
                     AddInfAndStart();
+
                     (sender as Button).IsEnabled = false;
+                    btStop.IsEnabled = true;
+                    SpumStatistic.IsEnabled = true;
                 }
             }
         }
@@ -252,6 +249,10 @@ namespace paradiceinBOT
         #region KeyDown
         private void TbChance_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
             if (e.Key == Key.Enter)
             {
                 if ((sender as TextBox).IsEnabled)
@@ -267,6 +268,10 @@ namespace paradiceinBOT
 
         private void TbMulty_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
             if (e.Key == Key.Enter)
             {
                 if (CheckmMultiply())
@@ -282,22 +287,46 @@ namespace paradiceinBOT
 
         private void MultipliedByWin_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
             if (e.Key == Key.Enter)
             {
                 CheckMultOnWinLose(sender as TextBox);
             }
         }
 
-        private void PreviewKeyDown(object sender, KeyEventArgs e)
+        private void Mins_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
             {
                 e.Handled = true;
             }
+            if (e.Key == Key.Enter)
+            {
+                CheckMins(mins);
+            }
+        }
+
+        private void Bets_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
+            if (e.Key == Key.Enter)
+            {
+                CheckBets(bets);
+            }
         }
 
         private void TextBet1_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
             if (e.Key == Key.Enter)
             {
                 CheckBet();
@@ -305,6 +334,7 @@ namespace paradiceinBOT
         }
         #endregion
 
+        #region multipliedByWinSettings
         private void RadioButton_Checked_3(object sender, RoutedEventArgs e)
         {
             if (multipliedByWin != null)
@@ -317,15 +347,19 @@ namespace paradiceinBOT
         {
             if (multipliedByWin != null)
             {
+                multipliedByWin.Text = "2";
                 multipliedByWin.IsEnabled = false;
             }
         }
+        #endregion
 
+        #region multipliedByLoseSettings
         private void RadioButton_Checked_4(object sender, RoutedEventArgs e)
         {
             if (multipliedByLose != null)
             {
                 multipliedByLose.IsEnabled = false;
+                multipliedByLose.Text = "2";
             }
         }
 
@@ -336,18 +370,53 @@ namespace paradiceinBOT
                 multipliedByLose.IsEnabled = true;
             }
         }
+        #endregion
 
-        private void Multiplied(object sender, KeyEventArgs e)
+        #region SpamSettings
+        private void RadioButton_Checked_6(object sender, RoutedEventArgs e)
         {
-            if (e.Key == Key.Space)
+            if (mins != null || bets != null)
             {
-                e.Handled = true;
+                mins.IsEnabled = false;
+                bets.IsEnabled = false;
+                bets.Text = "10000";
+                mins.Text = "10";
             }
         }
+
+        private void RadioButton_Checked_7(object sender, RoutedEventArgs e)
+        {
+            if (mins != null || bets != null)
+            {
+                mins.IsEnabled = true;
+                bets.IsEnabled = false;
+                bets.Text = "10000";
+            }
+        }
+
+        private void RadioButton_Checked_8(object sender, RoutedEventArgs e)
+        {
+            if (mins != null || bets != null)
+            {
+                mins.IsEnabled = false;
+                mins.Text = "10";
+                bets.IsEnabled = true;
+            }
+        }
+        #endregion
 
         private void SpumStatistic_Click(object sender, RoutedEventArgs e)
         {
             controller.OnceSpam();
         }
+
+        private void BtStop_Click(object sender, RoutedEventArgs e)
+        {
+            controller.Stop();
+            btStop.IsEnabled = false;
+            SpumStatistic.IsEnabled = false;
+            bt1.IsEnabled = true;
+        }
+
     }
 }

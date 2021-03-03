@@ -1,22 +1,24 @@
 ﻿using RestSharp;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace paradiceinBOT
 {
     public class ClassBet
     {
-        private DataForBet dataForBet;
+        private static DataForBet dataForBet;
         private DataForRequest dataForRequest;
         private RequestWithData requestWithData;
-        private WriteReadFile dataWiter;
+        private static WriteReadFile dataWiter;
 
         //Токен авторизации
         private string token;
 
         //Счётчики: Всего ставок, Текущий стак побед, Текущий стак поражений
-        private long i = 0;
+        private static long i = 0;
         private int maxL, maxW;
         
        
@@ -44,16 +46,22 @@ namespace paradiceinBOT
 
 
         //Блок инфы
-        private TextBlock frontStatusBlock;
+        private static TextBlock frontStatusBlock = new TextBlock();
 
-        private int sesMaxLose = 0;
-        private int sesMaxWin = 0;
+        private static int sesMaxLose = 0;
+        private static int sesMaxWin = 0;
 
-        public ClassBet(TextBlock frontStatusBlock, DataForBet data, WriteReadFile dataWiter)
+        //flag of Spam on bets
+        private static bool flagOfSpam = false;
+        //count of bets for Spam
+        private static int countBetsForSpam = 10000;
+
+        private static RequestWithStatistic requestWithStatistic;
+
+        public ClassBet(TextBlock frontStatusBlockFromUI, DataForBet data, WriteReadFile dataWiterIn, int countBetsForSpamIn, bool flagForSpamOnBets, RequestWithStatistic requestStat)
         {
-            
-            this.dataForBet = data;
-            this.frontStatusBlock = frontStatusBlock;
+            dataForBet = data;
+            frontStatusBlock = frontStatusBlockFromUI;
 
             dataForRequest = new DataForRequest();
             dataForRequest.token = dataForBet.token;
@@ -61,7 +69,7 @@ namespace paradiceinBOT
 
             requestWithData = new RequestWithData(dataForRequest);
 
-            this.dataWiter = dataWiter;
+            dataWiter = dataWiterIn;
 
             maxL = 0;
             maxW = 0;
@@ -72,9 +80,16 @@ namespace paradiceinBOT
             dataForBet.betS = $"{dataForBet.baseBetD:f8}";
             dataForBet.betS = dataForBet.betS.Replace(",", ".");
             dataForBet.betD = dataForBet.baseBetD;
-
-
             dataForBet.wagered += dataForBet.baseBetD;
+
+            i = 0;
+            sesMaxLose = 0;
+            sesMaxWin = 0;
+
+            flagOfSpam = flagForSpamOnBets;
+            countBetsForSpam = countBetsForSpamIn;
+
+            requestWithStatistic = requestStat;
         }
 
         private void СopyData()
@@ -402,9 +417,10 @@ namespace paradiceinBOT
             } while (true);
         }
 
-        private void InfOut()
+
+        private static void InfOut()
         {
-            if (i%5500==0)
+            if(i % 5500 == 0)
             {
                 dataWiter.ReCreateFile();
             }
@@ -416,7 +432,33 @@ namespace paradiceinBOT
                 "\nMaxLose " + sesMaxLose +
                 "\nMaxWin " + sesMaxWin +
                 "\nПрофит " + $"{dataForBet.profit:f8}"));
+            if (flagOfSpam)
+            {
+                if (i % countBetsForSpam==0)
+                {
+                    requestWithStatistic.RequestToSite();
+                }
+            }
         }
+        private static async void InfOutAsync()
+        {
+            Task.Run(() => InfOut());
+        }
+        //private void InfOut()
+        //{
+        //    if (i % 5500 == 0)
+        //    {
+        //        dataWiter.ReCreateFile();
+        //    }
+        //    dataWiter.AddProfitToFile(dataForBet.profit);
+        //    frontStatusBlock.Dispatcher.Invoke(new Action(() => frontStatusBlock.Text =
+        //        "Ставки: " + i +
+        //        "\nПобеды " + dataForBet.iw +
+        //        "\nПоражения " + dataForBet.il +
+        //        "\nMaxLose " + sesMaxLose +
+        //        "\nMaxWin " + sesMaxWin +
+        //        "\nПрофит " + $"{dataForBet.profit:f8}"));
+        //}
 
         private bool ChangeSide(bool flag)
         {
@@ -443,7 +485,7 @@ namespace paradiceinBOT
             sesMaxWin = maxW > sesMaxWin ? maxW : sesMaxWin;
             dataForBet.wagered += dataForBet.betD;
             i++;
-            InfOut();
+            InfOutAsync();
         }
     }
 }
