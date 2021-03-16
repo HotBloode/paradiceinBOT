@@ -61,11 +61,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DataForRequest.cs" />
-    <Compile Include="InfoForSpam.cs" />
-    <Compile Include="RequestWithData.cs" />
-    <Compile Include="RequestWithStatistic .cs" />
-    <Compile Include="WriteReadFile.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -74,11 +69,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CheckAuthorization.cs" />
-    <Compile Include="Class1.cs" />
-    <Compile Include="ClassBet.cs" />
-    <Compile Include="Controller.cs" />
-    <Compile Include="DataForBet.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
