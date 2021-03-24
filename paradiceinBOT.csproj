@@ -61,6 +61,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Data Classes\ChatInfo.cs" />
+    <Compile Include="Data Classes\DataOfBettingResults.cs" />
+    <Compile Include="Data Classes\InfoAboutUser.cs" />
+    <Compile Include="RequestBuilder.cs" />
+    <Compile Include="RequestWithData.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -101,5 +106,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
