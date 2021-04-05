@@ -33,15 +33,15 @@
 
         public double wagered;
 
-        public int iw;
-        public int il;
+        public int countOfAllWins;
+        public int countOfAllLose;
 
         public DataForBet()
         {
             profit = 0.0;
             wagered = 0.0;
-            iw = 0;
-            il = 0;
+            countOfAllWins = 0;
+            countOfAllLose = 0;
         }
 
         //Stop flags

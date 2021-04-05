@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using paradiceinBOT.Data_Classes;
 using RestSharp;
 
 namespace paradiceinBOT
@@ -66,38 +67,19 @@ namespace paradiceinBOT
             return 3;
         }
 
-        public void SpamStatistick(string сurrency, double wagered, double profit, int iw, int il)
+        public void SpamStatistick()
         {
-            IRestResponse resOfReq = request.GetData(sDataForStatistick1 + сurrency + sDataForStatistick2 + ($"{wagered:f8}").Replace(",", ".") + sDataForStatistick3 + ($"{profit:f8}").Replace(",", ".") + sDataForStatistick4 + iw + sDataForStatistick5 + il + sDataForStatistick6 + GetWageredList() + sDataForStatistick7);
-        }
+            ReadFileWIthBets readFileWIthBets = new ReadFileWIthBets();
+            ReadFileWithStatisticInfo readFileWithStatisticInfo = new ReadFileWithStatisticInfo();
+            DataForSpamStatistic data = readFileWithStatisticInfo.GetStatisticInfo();
 
-        private string GetWageredList()
-        {
-            bool flagEx = true;
-            string wageredList = "";
-
-            do
-            {
-                try
-                {
-
-                    using (StreamReader sr = new StreamReader("wagered.json"))
-                    {
-                        wageredList = sr.ReadToEnd();
-                        flagEx = false;
-                    }
-                }
-                catch (System.IO.IOException e)
-                {
-
-                }
-
-            } while (flagEx);
-
-
-            wageredList = wageredList.Remove(wageredList.Length - 1);
-
-            return wageredList;
+            IRestResponse resOfReq = request.GetData(sDataForStatistick1 + data.сurrency +
+                                                     sDataForStatistick2 + data.wagered +
+                                                     sDataForStatistick3 + data.wagered +
+                                                     sDataForStatistick4 + data.win +
+                                                     sDataForStatistick5 + data.lose +
+                                                     sDataForStatistick6 +
+                                                     readFileWIthBets.GetWageredList() + sDataForStatistick7);
         }
 
         public InfoAboutUser GetUserInfo()

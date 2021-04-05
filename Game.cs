@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using paradiceinBOT.Data_Classes;
 
 namespace paradiceinBOT
 {
@@ -8,10 +9,10 @@ namespace paradiceinBOT
     {
         private static DataForBet dataForBet;
         private DataForBetRequest dataForBetRequest;
-
-        private RequestWithData requestWithData;
-        private static WriteReadFile dataWiter;
-        private RequestBuilder builder;
+        private static DataForSpamStatistic dataForSpamStatistic = new DataForSpamStatistic();
+        private static WriteFile writer = new WriteFile();
+        private static RequestBuilder builder =  new RequestBuilder("");
+        private  ReadFileWIthBets readFileWIthBets = new ReadFileWIthBets();
 
         //Токен авторизации
         private string token;
@@ -52,21 +53,20 @@ namespace paradiceinBOT
 
         //flag of Spam on bets
         private static bool flagOfSpam = false;
+
         //count of bets for Spam
         private static int countBetsForSpam = 10000;
 
-        private static RequestWithStatistic requestWithStatistic;
 
-        public ClassBet(TextBlock frontStatusBlockFromUI, DataForBet data, WriteReadFile dataWiterIn, int countBetsForSpamIn, bool flagForSpamOnBets, RequestWithStatistic requestStat, RequestBuilder builder)
+        public Game(TextBlock frontStatusBlockFromUI, DataForBet data, int countBetsForSpamIn, bool flagForSpamOnBets, RequestBuilder builder1)
         {
-            this.builder = builder;
+            builder = builder1;
             dataForBetRequest = new DataForBetRequest();
             dataForBetRequest.сurrency = dataForBet.сurrency;
 
             dataForBet = data;
             frontStatusBlock = frontStatusBlockFromUI;
 
-            dataWiter = dataWiterIn;
 
             maxL = 0;
             maxW = 0;
@@ -85,8 +85,6 @@ namespace paradiceinBOT
 
             flagOfSpam = flagForSpamOnBets;
             countBetsForSpam = countBetsForSpamIn;
-
-            requestWithStatistic = requestStat;
         }
 
         private void СopyData()
@@ -108,7 +106,7 @@ namespace paradiceinBOT
                 {
                     dataForBet.profit += ((dataForBet.baseBetD * dataForBet.multyProfit) - dataForBet.baseBetD);
 
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
 
                     maxL = 0;
                     maxW++;
@@ -119,7 +117,7 @@ namespace paradiceinBOT
                 {
                     dataForBet.profit -= dataForBet.baseBetD;
 
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
 
                     maxL++;
                     maxW = 0;
@@ -146,7 +144,7 @@ namespace paradiceinBOT
                 {
                     dataForBet.profit += ((dataForBet.baseBetD * dataForBet.multyProfit) - dataForBet.baseBetD);
 
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
 
                     maxL = 0;
                     maxW++;
@@ -159,7 +157,7 @@ namespace paradiceinBOT
                 {
                     dataForBet.profit -= dataForBet.baseBetD;
 
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
 
                     maxL++;
                     maxW = 0;
@@ -186,7 +184,7 @@ namespace paradiceinBOT
                 if (result==1)
                 {
                     dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
                     maxL = 0;
                     maxW++;
                     CalculateOutputInformation();
@@ -198,7 +196,7 @@ namespace paradiceinBOT
                 else if (result == 0)
                 {
                     dataForBet.profit -= dataForBet.betD;
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
                     maxL++;
                     maxW = 0;
                     CalculateOutputInformation();
@@ -224,7 +222,7 @@ namespace paradiceinBOT
                 if (result == 1)
                 {
                     dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
                     maxL = 0;
                     maxW++;
                     CalculateOutputInformation();
@@ -238,7 +236,7 @@ namespace paradiceinBOT
                 else if (result == 0)
                 {
                     dataForBet.profit -= dataForBet.betD;
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
                     maxL++;
                     maxW = 0;
                     CalculateOutputInformation();
@@ -264,7 +262,7 @@ namespace paradiceinBOT
                 if (result == 1)
                 {
                     dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
                     maxL = 0;
                     maxW++;
                     CalculateOutputInformation();
@@ -275,7 +273,7 @@ namespace paradiceinBOT
                 else if (result == 0)
                 {
                     dataForBet.profit -= dataForBet.betD;
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
                     maxL++;
                     maxW = 0;
                     CalculateOutputInformation();
@@ -302,7 +300,7 @@ namespace paradiceinBOT
                 if (result == 1)
                 {
                     dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
                     maxL = 0;
                     maxW++;
                     CalculateOutputInformation();
@@ -315,7 +313,7 @@ namespace paradiceinBOT
                 else if (result == 0)
                 {
                     dataForBet.profit -= dataForBet.betD;
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
                     maxL++;
                     maxW = 0;
                     CalculateOutputInformation();
@@ -343,7 +341,7 @@ namespace paradiceinBOT
                 if (result == 1)
                 {
                     dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
                     maxL = 0;
                     maxW++;
                     CalculateOutputInformation();
@@ -355,7 +353,7 @@ namespace paradiceinBOT
                 else if (result == 0)
                 {
                     dataForBet.profit -= dataForBet.betD;
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
                     maxL++;
                     maxW = 0;
                     CalculateOutputInformation();
@@ -382,7 +380,7 @@ namespace paradiceinBOT
                 if (result == 1)
                 {
                     dataForBet.profit += ((dataForBet.betD * dataForBet.multyProfit) - dataForBet.betD);
-                    dataForBet.iw++;
+                    dataForBet.countOfAllWins++;
                     maxL = 0;
                     maxW++;
                     CalculateOutputInformation();
@@ -396,7 +394,7 @@ namespace paradiceinBOT
                 else if (result == 0)
                 {
                     dataForBet.profit -= dataForBet.baseBetD;
-                    dataForBet.il++;
+                    dataForBet.countOfAllLose++;
                     maxL++;
                     maxW = 0;
                     CalculateOutputInformation();
@@ -416,17 +414,25 @@ namespace paradiceinBOT
         }
         #endregion
 
+        
+
         private static void InfOut()
         {
             if (i % 5500 == 0)
             {
-                dataWiter.ReCreateFile();
+                writer.ReCreateFile();
             }
-            dataWiter.AddProfitToFile(dataForBet.profit);
+            writer.AddProfitToFile(dataForBet.profit);
+
+            dataForSpamStatistic.SetData(dataForBet.сurrency, dataForBet.wagered, dataForBet.profit,
+                dataForBet.countOfAllWins, dataForBet.countOfAllLose);
+            writer.AddDataForSpamStatiscToFile(dataForSpamStatistic);
+            
+
             frontStatusBlock.Dispatcher.Invoke(new Action(() => frontStatusBlock.Text =
                 "AllBets: " + i +
-                "\nWins " + dataForBet.iw +
-                "\nLosses " + dataForBet.il +
+                "\nWins " + dataForBet.countOfAllWins +
+                "\nLosses " + dataForBet.countOfAllLose +
                 "\nMaxLosses " + sesMaxLose +
                 "\nMaxWins " + sesMaxWin +
                 "\nProfit " + $"{dataForBet.profit:f8}"));
@@ -434,7 +440,7 @@ namespace paradiceinBOT
             {
                 if (i % countBetsForSpam == 0)
                 {
-                    requestWithStatistic.RequestToSite();
+                    builder.SpamStatistick();
                 }
             }
         }
@@ -470,5 +476,4 @@ namespace paradiceinBOT
             InfOutAsync();
         }
     }
-}
 }

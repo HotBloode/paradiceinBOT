@@ -69,12 +69,16 @@
     <Compile Include="Data Classes\ChatInfo.cs" />
     <Compile Include="Data Classes\DataForBet.cs" />
     <Compile Include="Data Classes\DataForBetRequest.cs" />
+    <Compile Include="Data Classes\DataForSpamStatistic.cs" />
     <Compile Include="Data Classes\DataOfBettingResults.cs" />
     <Compile Include="Data Classes\InfoAboutUser.cs" />
+    <Compile Include="ReadFileWIthBets.cs" />
+    <Compile Include="ReadFileWithStatisticInfo.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="ReadTokenFile.cs" />
     <Compile Include="RequestBuilder.cs" />
     <Compile Include="RequestWithData.cs" />
+    <Compile Include="WriteFile.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
