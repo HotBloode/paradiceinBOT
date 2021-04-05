@@ -42,10 +42,13 @@ namespace paradiceinBOT
             request = new RequestWithData(token);
         }
 
-        public int TakeBet(string bet, string chanse, string side, string сurrency)
+        public int TakeBet(DataForBetRequest dataForBetRequest)
         {
-            IRestResponse resOfReq=request.GetData(sDataForBet1 + bet + sDataForBet2 + chanse.Replace(",", ".") + sDataForBet3 + side +
-                                              sDataForBet4 + сurrency + sDataForBet5);
+            IRestResponse resOfReq=request.GetData(sDataForBet1 + dataForBetRequest.bet +
+                                                   sDataForBet2 + dataForBetRequest.chance.Replace(",", ".") +
+                                                   sDataForBet3 + dataForBetRequest.side +
+                                                   sDataForBet4 + dataForBetRequest.сurrency +
+                                                   sDataForBet5);
 
             var results = JsonConvert.DeserializeObject<DataOfBettingResults>(resOfReq.Content);
 
@@ -63,7 +66,7 @@ namespace paradiceinBOT
             return 3;
         }
 
-        private void SpamStatistick(string сurrency,double wagered, double profit, int iw, int il)
+        public void SpamStatistick(string сurrency, double wagered, double profit, int iw, int il)
         {
             IRestResponse resOfReq = request.GetData(sDataForStatistick1 + сurrency + sDataForStatistick2 + ($"{wagered:f8}").Replace(",", ".") + sDataForStatistick3 + ($"{profit:f8}").Replace(",", ".") + sDataForStatistick4 + iw + sDataForStatistick5 + il + sDataForStatistick6 + GetWageredList() + sDataForStatistick7);
         }
@@ -97,28 +100,31 @@ namespace paradiceinBOT
             return wageredList;
         }
 
-        private InfoAboutUser GetUserInfo()
+        public InfoAboutUser GetUserInfo()
         {
             IRestResponse resOfReq = request.GetData(sDataForGetUserInfo);
             InfoAboutUser infUser = JsonConvert.DeserializeObject<InfoAboutUser>(resOfReq.Content);
             return infUser;
         }
 
-        private ChatInfo GetInfoAboutChat()
+        public ChatInfo GetInfoAboutChat()
         {
             IRestResponse resOfReq = request.GetData(sDataForGetChatInfo);
             ChatInfo infChat = JsonConvert.DeserializeObject<ChatInfo>(resOfReq.Content);
             return infChat;
         }
 
-        private void LikeMess(int idUser)
+        public void LikeMess(int idUser)
         {
             IRestResponse resOfReq = request.GetData(sDataForLike1+idUser+ sDataForLike2);
         }
 
-        private void SendMess(string mess)
+        public void SendMess(string mess)
         {
             IRestResponse resOfReq = request.GetData(sDataForMess1+mess+ sDataForMess2);
         }
+
+        
+
     }
 }

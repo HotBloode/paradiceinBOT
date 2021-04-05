@@ -4,20 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:paradiceinBOT"
-        mc:Ignorable="d"
-        Title="Paradice" Height="255.067" Width="644.608" MaxWidth="644.608" MaxHeight="255.067" MinWidth="644.608" MinHeight="255.067">
-    <Grid HorizontalAlignment="Left" Margin="0,0,0,1.6" Width="635">
+        
+        Title="ParadiceBot" Height="390.477" Width="727.008" MinWidth="644.608" MinHeight="255.067" Icon="logo (2).png" IsEnabled="True" Loaded="Window_Loaded">
+    <Grid HorizontalAlignment="Right" Width="707" Height="355" VerticalAlignment="Top" Margin="0,0,3.8,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="324*"></RowDefinition>
+            <RowDefinition Height="31*"></RowDefinition>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="67*"/>
             <ColumnDefinition Width="62*"/>
             <ColumnDefinition Width="102*"/>
             <ColumnDefinition Width="87*"/>
         </Grid.ColumnDefinitions>
-        
-
-
-       
-
-
+        <Label x:Name="LabelStatus" Content="Label" HorizontalAlignment="Left" Margin="-1,0,0,0" Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="4" Height="31" Width="621"/>
+        <Button x:Name="ButtonChek" Content="Chek" Grid.Column="3" HorizontalAlignment="Left" Margin="129.2,3,0,0" VerticalAlignment="Top" Width="54" Grid.Row="1"/>
     </Grid>
 </Window>
